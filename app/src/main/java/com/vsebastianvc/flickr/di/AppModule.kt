@@ -6,6 +6,7 @@ import com.vsebastianvc.flickr.network.FlickrApiService
 import com.vsebastianvc.flickr.network.FlickrApiServiceImpl
 import com.vsebastianvc.flickr.network.FlickrService
 import com.vsebastianvc.flickr.network.FlickrServiceImpl
+import com.vsebastianvc.flickr.photodetail.viewmodel.PhotoDetailViewModel
 import com.vsebastianvc.flickr.photogallery.viewmodel.PhotoGalleryViewModel
 import com.vsebastianvc.flickr.repository.PhotoRepository
 import org.koin.android.ext.koin.androidContext
@@ -36,5 +37,8 @@ val appModule = module {
 
     // ViewModel for PhotoGallery
     viewModel { PhotoGalleryViewModel(photoRepository = get()) }
+
+    // ViewModel for PhotoDetail
+    viewModel { PhotoDetailViewModel(photoRepository = get()) }
 
 }
