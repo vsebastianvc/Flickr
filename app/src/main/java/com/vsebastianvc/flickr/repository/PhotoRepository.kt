@@ -7,33 +7,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class PhotoRepository(
-    private val apiService: FlickrApiService,
+    private val flickrApiService: FlickrApiService,
     private val photoDao: PhotoDao
 ) {
-    suspend fun getPhotos(query: String): List<PhotoEntity> {
+
+    suspend fun getCachedPhotos(): List<PhotoEntity> {
         return withContext(Dispatchers.IO) {
-            val localPhotos = photoDao.getAllPhotos()
-            localPhotos.ifEmpty {
-                val photos = apiService.searchPhotos(query)
-                val photoEntities = photos.map { photo ->
-                    PhotoEntity(
-                        id = photo.id,
-                        title = photo.title,
-                        description = photo.description,
-                        dateTaken = photo.dateTaken,
-                        datePosted = photo.datePosted,
-                        imageUrl = photo.mediumUrl
-                    )
-                }
-                photoDao.insertAll(photoEntities)
-                photoEntities
-            }
+            photoDao.getAllPhotos()
         }
     }
 
-    suspend fun getPhotoById(photoId: String): PhotoEntity? {
+    suspend fun getPhotos(query: String): List<PhotoEntity> {
         return withContext(Dispatchers.IO) {
-            photoDao.getPhotoById(photoId)
+            val photos = flickrApiService.searchPhotos(query) ?: emptyList()
+            val photoEntities = photos.map { photo ->
+                PhotoEntity(
+                    id = photo.id,
+                    title = photo.title,
+                    description = photo.description,
+                    dateTaken = photo.dateTaken,
+                    datePosted = photo.datePosted,
+                    imageUrl = photo.mediumUrl
+                )
+            }
+            clearCachedPhotos()
+            photoDao.insertAll(photoEntities)
+            photoEntities
+        }
+    }
+
+    private suspend fun clearCachedPhotos() {
+        withContext(Dispatchers.IO) {
+            photoDao.deleteAllPhotos()
         }
     }
 }
