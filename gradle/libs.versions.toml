@@ -17,6 +17,7 @@ flickrjVersion = "2.1.0"
 # Koin
 koin = "3.4.3"
 koinCompose = "3.4.5"
+koinTestJunit4 = "3.5.0"
 
 # Coroutines
 coroutines = "1.7.3"
@@ -29,9 +30,10 @@ navigationCompose = "2.7.7"
 
 # Testing Libraries
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
 mockito = "4.4.0"
+mokitoAndroid = "4.4.0"
+uiTestJunit4Android = "1.6.8"
+navigationTesting = "2.7.7"
 
 [libraries]
 # Core Libraries
@@ -49,7 +51,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 # Flickr
-flickrj = {group = "com.googlecode.flickrj-android", name="flickrj-android", version.ref = "flickrjVersion"}
+flickrj = { group = "com.googlecode.flickrj-android", name = "flickrj-android", version.ref = "flickrjVersion" }
 
 # Koin libraries
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
@@ -67,9 +69,12 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 
 # Testing Libraries
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+koin-test-junit4 = { group = "io.insert-koin", name = "koin-test-junit4", version.ref = "koinTestJunit4" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-android = { module = "org.mockito:mockito-android", version.ref = "mokitoAndroid" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mokitoAndroid" }
+androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "uiTestJunit4Android" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

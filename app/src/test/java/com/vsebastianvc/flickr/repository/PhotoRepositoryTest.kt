@@ -11,13 +11,13 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.text.SimpleDateFormat
 import java.util.Date
 
 class PhotoRepositoryTest {
+
 
     @Mock
     private lateinit var mockApiService: FlickrApiService
@@ -29,7 +29,6 @@ class PhotoRepositoryTest {
     private lateinit var closeable: AutoCloseable
 
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd")
-
     private lateinit var fixedDate: Date
 
     @Before
@@ -46,6 +45,7 @@ class PhotoRepositoryTest {
 
     @Test
     fun getPhotosReturnsPhotosFromDAOWhenAvailable() = runTest {
+        // Arrange
         val cachedPhotos = listOf(
             PhotoEntity(
                 id = "1",
@@ -58,15 +58,17 @@ class PhotoRepositoryTest {
         )
         `when`(mockPhotoDao.getAllPhotos()).thenReturn(cachedPhotos)
 
-        val result = photoRepository.getPhotos("moon")
+        // Act
+        val result = photoRepository.getCachedPhotos()
 
-        verify(mockPhotoDao).getAllPhotos()
-        verifyNoInteractions(mockApiService)
-        assert(result == cachedPhotos)
+        // Assert
+        verify(mockPhotoDao).getAllPhotos() // Ensure getAllPhotos was called
+        assert(result == cachedPhotos) // Ensure the result matches expected
     }
 
     @Test
-    fun getPhotosFetchesFromNetworkWhenCacheIsEmptyAndSavesToDatabase() = runTest {
+    fun getPhotosFetchesFromAPIAndCachesThem() = runTest {
+        // Arrange
         val newPhotoList = PhotoList()
         val newPhoto = Photo().apply {
             id = "2"
@@ -77,8 +79,6 @@ class PhotoRepositoryTest {
             url = "url"
         }
         newPhotoList.add(newPhoto)
-        `when`(mockPhotoDao.getAllPhotos()).thenReturn(emptyList())
-        `when`(mockApiService.searchPhotos("moon")).thenReturn(newPhotoList)
 
         val expectedPhotoEntities = newPhotoList.map { photo ->
             PhotoEntity(
@@ -91,10 +91,30 @@ class PhotoRepositoryTest {
             )
         }
 
+        `when`(mockApiService.searchPhotos("moon")).thenReturn(newPhotoList)
+        `when`(mockPhotoDao.getAllPhotos()).thenReturn(emptyList())
+
+        // Act
         val result = photoRepository.getPhotos("moon")
 
-        verify(mockPhotoDao).insertAll(expectedPhotoEntities)
-        verify(mockApiService).searchPhotos("moon")
-        assert(result == expectedPhotoEntities)
+        // Assert
+        verify(mockPhotoDao).deleteAllPhotos() // Ensure the cache was cleared
+        verify(mockPhotoDao).insertAll(expectedPhotoEntities) // Ensure new photos were cached
+        verify(mockApiService).searchPhotos("moon") // Ensure the API was called
+        assert(result == expectedPhotoEntities) // Ensure the result matches expected
+    }
+
+    @Test
+    fun getPhotosReturnsEmptyListWhenAPIReturnsNull() = runTest {
+        // Arrange
+        `when`(mockApiService.searchPhotos("moon")).thenReturn(null)
+
+        // Act
+        val result = photoRepository.getPhotos("moon")
+
+        // Assert
+        verify(mockPhotoDao).deleteAllPhotos() // Ensure the cache was cleared
+        verify(mockPhotoDao).insertAll(emptyList()) // Ensure empty list was cached
+        assert(result.isEmpty()) // Ensure the result is empty
     }
 }
