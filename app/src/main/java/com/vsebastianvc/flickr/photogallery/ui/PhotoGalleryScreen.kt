@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -48,6 +47,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.vsebastianvc.flickr.data.local.PhotoEntity
 import com.vsebastianvc.flickr.navigation.FlickrScreens
 import com.vsebastianvc.flickr.photogallery.viewmodel.PhotoGalleryViewModel
+import com.vsebastianvc.flickr.ui.common.Loading
 import org.koin.androidx.compose.getViewModel
 
 
@@ -170,18 +170,6 @@ fun PhotoItem(navController: NavController, photo: PhotoEntity) {
                 ImageErrorPlaceHolder()
             }
         )
-    }
-}
-
-@Composable
-fun Loading(backGroundColor: Color = Color.DarkGray) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backGroundColor),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
     }
 }
 

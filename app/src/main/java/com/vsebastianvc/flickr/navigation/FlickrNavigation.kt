@@ -19,7 +19,7 @@ fun FlickrNavigation() {
 
         val photoDetailRoute = "${FlickrScreens.PhotoDetail.name}/{photoId}"
         composable(photoDetailRoute) { backStackEntry ->
-            PhotoDetailScreen(photoId = backStackEntry.arguments?.getString("photoId"))
+            PhotoDetailScreen(photoId = backStackEntry.arguments?.getString("photoId"), navController)
         }
     }
 }

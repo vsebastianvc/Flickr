@@ -41,4 +41,10 @@ class PhotoRepository(
             photoDao.deleteAllPhotos()
         }
     }
+
+    suspend fun getPhotoById(photoId: String): PhotoEntity? {
+        return withContext(Dispatchers.IO) {
+            photoDao.getPhotoById(photoId)
+        }
+    }
 }
