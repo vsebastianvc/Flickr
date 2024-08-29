@@ -43,4 +43,31 @@ A modern Android application to browse and view photos from Flickr, featuring a 
   - `ui/`: Common UI components.
   - `utils/`: Utility classes, including network utilities.
 
+### Local Properties Setup
 
+To run the project, you need to set up the `flickr_api_key` and `flickr_api_secret` in your `local.properties` file. This file is located in the root directory of your project.
+
+1. Open (or create) `local.properties` in the root directory.
+2. Add the following lines with your Flickr API credentials:
+
+   ```properties
+   flickr_api_key=your_flickr_api_key_here
+   flickr_api_secret=your_flickr_api_secret_here
+   ```
+
+   Replace `your_flickr_api_key_here` and `your_flickr_api_secret_here` with your actual API key and secret from Flickr.
+
+### How to Run
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/vsebastianvc/Flickr.git
+   ```
+
+2. **Set up your `local.properties`** file as described above.
+
+3. **Open the project** in Android Studio.
+
+4. **Sync the project** with Gradle.
+
+5. **Run the app** on an emulator or a physical device.
