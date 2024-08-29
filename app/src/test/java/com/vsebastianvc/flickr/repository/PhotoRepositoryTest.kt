@@ -5,6 +5,7 @@ import com.googlecode.flickrjandroid.photos.PhotoList
 import com.vsebastianvc.flickr.data.local.PhotoDao
 import com.vsebastianvc.flickr.data.local.PhotoEntity
 import com.vsebastianvc.flickr.network.FlickrApiService
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -18,7 +19,6 @@ import java.util.Date
 
 class PhotoRepositoryTest {
 
-
     @Mock
     private lateinit var mockApiService: FlickrApiService
 
@@ -30,6 +30,8 @@ class PhotoRepositoryTest {
 
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd")
     private lateinit var fixedDate: Date
+
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
@@ -44,7 +46,7 @@ class PhotoRepositoryTest {
     }
 
     @Test
-    fun getPhotosReturnsPhotosFromDAOWhenAvailable() = runTest {
+    fun getCachedPhotosReturnsPhotosFromDAOWhenAvailable() = runTest(testDispatcher) {
         // Arrange
         val cachedPhotos = listOf(
             PhotoEntity(
@@ -67,7 +69,7 @@ class PhotoRepositoryTest {
     }
 
     @Test
-    fun getPhotosFetchesFromAPIAndCachesThem() = runTest {
+    fun getPhotosFetchesFromAPIAndCachesThem() = runTest(testDispatcher) {
         // Arrange
         val newPhotoList = PhotoList()
         val newPhoto = Photo().apply {
@@ -91,26 +93,36 @@ class PhotoRepositoryTest {
             )
         }
 
-        `when`(mockApiService.searchPhotos("moon")).thenReturn(newPhotoList)
+        `when`(
+            mockApiService.searchPhotos(
+                "moon",
+                page = 1,
+                pageSize = 20
+            )
+        ).thenReturn(newPhotoList)
         `when`(mockPhotoDao.getAllPhotos()).thenReturn(emptyList())
 
         // Act
-        val result = photoRepository.getPhotos("moon")
+        val result = photoRepository.getPhotos("moon", page = 1, pageSize = 20)
 
         // Assert
         verify(mockPhotoDao).deleteAllPhotos() // Ensure the cache was cleared
         verify(mockPhotoDao).insertAll(expectedPhotoEntities) // Ensure new photos were cached
-        verify(mockApiService).searchPhotos("moon") // Ensure the API was called
+        verify(mockApiService).searchPhotos(
+            "moon",
+            page = 1,
+            pageSize = 20
+        ) // Ensure the API was called
         assert(result == expectedPhotoEntities) // Ensure the result matches expected
     }
 
     @Test
-    fun getPhotosReturnsEmptyListWhenAPIReturnsNull() = runTest {
+    fun getPhotosReturnsEmptyListWhenAPIReturnsNull() = runTest(testDispatcher) {
         // Arrange
-        `when`(mockApiService.searchPhotos("moon")).thenReturn(null)
+        `when`(mockApiService.searchPhotos("moon", page = 1, pageSize = 20)).thenReturn(null)
 
         // Act
-        val result = photoRepository.getPhotos("moon")
+        val result = photoRepository.getPhotos("moon", page = 1, pageSize = 20)
 
         // Assert
         verify(mockPhotoDao).deleteAllPhotos() // Ensure the cache was cleared

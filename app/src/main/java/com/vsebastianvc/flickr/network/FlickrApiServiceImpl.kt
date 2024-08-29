@@ -5,7 +5,7 @@ import com.googlecode.flickrjandroid.photos.PhotoList
 import com.googlecode.flickrjandroid.photos.SearchParameters
 
 class FlickrApiServiceImpl(private val flickrService: FlickrService) : FlickrApiService {
-    override suspend fun searchPhotos(query: String): PhotoList? {
+    override suspend fun searchPhotos(query: String, page: Int, pageSize: Int): PhotoList? {
         val photosInterface = flickrService.getPhotosInterface()
         val searchParameters = SearchParameters().apply {
             tags = arrayOf(query)
@@ -15,6 +15,6 @@ class FlickrApiServiceImpl(private val flickrService: FlickrService) : FlickrApi
                 Extras.DATE_UPLOAD
             ))
         }
-        return photosInterface.search(searchParameters, 20, 1)
+        return photosInterface.search(searchParameters, pageSize, page)
     }
 }

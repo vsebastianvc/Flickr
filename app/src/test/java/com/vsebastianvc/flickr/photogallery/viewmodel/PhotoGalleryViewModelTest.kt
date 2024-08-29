@@ -6,12 +6,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -39,45 +38,48 @@ class PhotoGalleryViewModelTest {
     }
 
     @Test
-    fun loadCachedPhotosLoadsPhotosFromRepositoryAndUpdatesState() = runTest {
+    fun loadPhotosUpdatesStateAndLoadingFlag() = runTest {
         // Arrange
-        val cachedPhotos = listOf(
+        val photoList = listOf(
             PhotoEntity("1", "Moon", "Nice moon", null, null, "url")
         )
-        `when`(mockPhotoRepository.getCachedPhotos()).thenReturn(cachedPhotos)
 
-        // Act
+        `when`(mockPhotoRepository.getCachedPhotos()).thenReturn(emptyList())
+        `when`(mockPhotoRepository.getPhotos("moon", page = 1, pageSize = 20)).thenReturn(photoList)
         viewModel = PhotoGalleryViewModel(mockPhotoRepository)
 
-        // Advance until the coroutine is finished
-        testScheduler.advanceUntilIdle()
+        // Act
+        viewModel.searchPhotos("moon")
+        advanceUntilIdle() // Ensure all coroutines have completed
 
         // Assert
-        assertEquals(cachedPhotos, viewModel.photos.first())
-        assertFalse(viewModel.isLoading.first())
+        assert(viewModel.photos.first() == photoList)
+        assert(!viewModel.isLoading.first())
     }
 
     @Test
-    fun searchPhotosUpdatesPhotosAndLoadingState() = runTest {
+    fun loadMorePhotosAppendsToList() = runTest {
         // Arrange
-        val cachedPhotos = emptyList<PhotoEntity>()
-        val networkPhotos = listOf(
-            PhotoEntity("2", "Sun", "Bright sun", null, null, "url")
-        )
+        val initialPhotos = listOf(PhotoEntity("1", "Moon", "Nice moon", null, null, "url"))
+        val morePhotos = listOf(PhotoEntity("2", "Sun", "Bright sun", null, null, "url"))
 
-        `when`(mockPhotoRepository.getCachedPhotos()).thenReturn(cachedPhotos)
-        `when`(mockPhotoRepository.getPhotos("sun")).thenReturn(networkPhotos)
-
+        `when`(mockPhotoRepository.getCachedPhotos()).thenReturn(emptyList())
+        `when`(mockPhotoRepository.getPhotos("moon", page = 1, pageSize = 20)).thenReturn(initialPhotos)
+        `when`(mockPhotoRepository.getPhotos("moon", page = 2, pageSize = 20)).thenReturn(morePhotos)
         viewModel = PhotoGalleryViewModel(mockPhotoRepository)
 
         // Act
-        viewModel.searchPhotos("sun")
+        viewModel.searchPhotos("moon")
+        advanceUntilIdle() // Complete initial load
 
-        // Advance until the coroutine is finished
-        testScheduler.advanceUntilIdle()
+        viewModel.loadMorePhotos()
+        advanceUntilIdle() // Complete load more
 
         // Assert
-        assertEquals(networkPhotos, viewModel.photos.first())
-        assertFalse(viewModel.isLoading.first())
+        val allPhotos = viewModel.photos.first()
+        assert(allPhotos.size == 2)
+        assert(allPhotos[0] == initialPhotos[0])
+        assert(allPhotos[1] == morePhotos[0])
+        assert(!viewModel.isLoading.first())
     }
 }

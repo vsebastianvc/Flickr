@@ -4,6 +4,7 @@ import com.vsebastianvc.flickr.data.local.AppDatabase
 import com.vsebastianvc.flickr.data.local.PhotoDao
 import com.vsebastianvc.flickr.network.FlickrApiService
 import com.vsebastianvc.flickr.network.FlickrService
+import com.vsebastianvc.flickr.photodetail.viewmodel.PhotoDetailViewModel
 import com.vsebastianvc.flickr.photogallery.viewmodel.PhotoGalleryViewModel
 import com.vsebastianvc.flickr.repository.PhotoRepository
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -18,4 +19,7 @@ val testAppModule = module {
     single { PhotoRepository(flickrApiService = get(), photoDao = get()) }
 
     viewModel { PhotoGalleryViewModel(photoRepository = get()) }
+
+    // ViewModel for PhotoDetail
+    viewModel { PhotoDetailViewModel(photoRepository = get()) }
 }
