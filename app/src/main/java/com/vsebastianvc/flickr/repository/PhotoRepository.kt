@@ -17,22 +17,28 @@ class PhotoRepository(
         }
     }
 
-    suspend fun getPhotos(query: String): List<PhotoEntity> {
+    suspend fun getPhotos(query: String, page: Int, pageSize: Int): List<PhotoEntity> {
         return withContext(Dispatchers.IO) {
-            val photos = flickrApiService.searchPhotos(query) ?: emptyList()
-            val photoEntities = photos.map { photo ->
-                PhotoEntity(
-                    id = photo.id,
-                    title = photo.title,
-                    description = photo.description,
-                    dateTaken = photo.dateTaken,
-                    datePosted = photo.datePosted,
-                    imageUrl = photo.mediumUrl
-                )
+            try {
+                val photos = flickrApiService.searchPhotos(query, page, pageSize) ?: emptyList()
+                val photoEntities = photos.map { photo ->
+                    PhotoEntity(
+                        id = photo.id,
+                        title = photo.title,
+                        description = photo.description,
+                        dateTaken = photo.dateTaken,
+                        datePosted = photo.datePosted,
+                        imageUrl = photo.mediumUrl
+                    )
+                }
+                if (page == 1) {
+                    clearCachedPhotos()
+                }
+                photoDao.insertAll(photoEntities)
+                photoEntities
+            } catch (e: Exception) {
+                emptyList()
             }
-            clearCachedPhotos()
-            photoDao.insertAll(photoEntities)
-            photoEntities
         }
     }
 

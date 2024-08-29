@@ -4,6 +4,7 @@ import com.googlecode.flickrjandroid.photos.Photo
 import com.googlecode.flickrjandroid.photos.PhotoList
 import com.googlecode.flickrjandroid.photos.PhotosInterface
 import com.googlecode.flickrjandroid.photos.SearchParameters
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -27,6 +28,8 @@ class FlickrApiServiceImplTest {
     private lateinit var flickrApiServiceImpl: FlickrApiServiceImpl
     private lateinit var closeable: AutoCloseable
 
+    private val testDispatcher = StandardTestDispatcher()
+
     @Before
     fun setUp() {
         closeable = MockitoAnnotations.openMocks(this)
@@ -40,7 +43,7 @@ class FlickrApiServiceImplTest {
     }
 
     @Test
-    fun searchPhotosReturnsCorrectData() = runTest {
+    fun searchPhotosReturnsCorrectData() = runTest(testDispatcher) {
         // Arrange
         val dummyPhotos = PhotoList()
         dummyPhotos.add(Photo())
@@ -52,16 +55,23 @@ class FlickrApiServiceImplTest {
             )
         ).thenReturn(dummyPhotos)
 
+        val page = 1
+        val pageSize = 20
+
         // Act
-        val result = flickrApiServiceImpl.searchPhotos("moon")
+        val result = flickrApiServiceImpl.searchPhotos("moon", page, pageSize)
 
         // Assert
-        verify(mockPhotosInterface).search(any(SearchParameters::class.java), eq(20), eq(1))
+        verify(mockPhotosInterface).search(
+            any(SearchParameters::class.java),
+            eq(pageSize),
+            eq(page)
+        )
         assert(result == dummyPhotos)
     }
 
     @Test
-    fun searchPhotosReturnsEmptyListWhenNoPhotosAreFound() = runTest {
+    fun searchPhotosReturnsEmptyListWhenNoPhotosAreFound() = runTest(testDispatcher) {
         // Arrange
         val emptyPhotoList = PhotoList()
         `when`(
@@ -72,11 +82,18 @@ class FlickrApiServiceImplTest {
             )
         ).thenReturn(emptyPhotoList)
 
+        val page = 1
+        val pageSize = 20
+
         // Act
-        val result = flickrApiServiceImpl.searchPhotos("moon")
+        val result = flickrApiServiceImpl.searchPhotos("moon", page, pageSize)
 
         // Assert
-        verify(mockPhotosInterface).search(any(SearchParameters::class.java), eq(20), eq(1))
+        verify(mockPhotosInterface).search(
+            any(SearchParameters::class.java),
+            eq(pageSize),
+            eq(page)
+        )
         assert(result?.isEmpty() ?: true)
     }
 }

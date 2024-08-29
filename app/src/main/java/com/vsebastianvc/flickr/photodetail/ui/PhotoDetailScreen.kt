@@ -30,17 +30,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.vsebastianvc.flickr.R
 import com.vsebastianvc.flickr.data.local.PhotoEntity
 import com.vsebastianvc.flickr.photodetail.viewmodel.PhotoDetailViewModel
 import com.vsebastianvc.flickr.ui.common.Loading
+import com.vsebastianvc.flickr.ui.common.PhotoItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
@@ -64,7 +62,7 @@ fun PhotoDetailScreen(
         sheetContent = {
             photoDetail?.let { detail ->
                 PhotoDetailSheetContent(detail, navController)
-            } ?: LoadingContent("Loading details...")
+            } ?: LoadingContent(stringResource(id = R.string.loading_details))
         }
     ) {
         PhotoDetailBody(photoDetail, scaffoldState, coroutineScope)
@@ -85,21 +83,21 @@ fun PhotoDetailSheetContent(detail: PhotoEntity, navController: NavController) {
             style = MaterialTheme.typography.headlineMedium
         )
         Text(
-            text = "Description: ${detail.description?.ifEmpty { "No description available" }}",
+            text = "Description: ${detail.description?.ifEmpty { stringResource(id = R.string.no_description_available) }}",
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Date Taken: ${detail.dateTaken ?: "Date not available"}",
+            text = "Date Taken: ${detail.dateTaken ?: stringResource(id = R.string.date_not_available)}",
             style = MaterialTheme.typography.bodySmall
         )
         Text(
-            text = "Date Posted: ${detail.datePosted ?: "Date not available"}",
+            text = "Date Posted: ${detail.datePosted ?: stringResource(id = R.string.date_not_available)}",
             style = MaterialTheme.typography.bodySmall
         )
         Spacer(modifier = Modifier.height(20.dp))
         ClickableText(
-            text = AnnotatedString("Back to Gallery"),
+            text = AnnotatedString(stringResource(id = R.string.back_to_gallery)),
             onClick = { navController.navigateUp() }
         )
     }
@@ -125,7 +123,7 @@ fun PhotoDetailBody(
             verticalArrangement = Arrangement.Center
         ) {
             photoDetail?.let { detail ->
-                PhotoDetailImage(detail)
+                PhotoItem(photo = detail)
             } ?: Loading()
             photoDetail?.let { detail ->
                 PhotoDetailTitle(detail.title)
@@ -133,22 +131,6 @@ fun PhotoDetailBody(
             PhotoDetailIcon(scaffoldState, coroutineScope)
         }
     }
-}
-
-@Composable
-fun PhotoDetailImage(detail: PhotoEntity) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(detail.imageUrl)
-            .crossfade(true)
-            .build(),
-        contentDescription = detail.title,
-        placeholder = painterResource(id = R.drawable.hero_image_placeholder),
-        error = painterResource(id = R.drawable.hero_image_error),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp)
-    )
 }
 
 @Composable
@@ -169,7 +151,7 @@ fun PhotoDetailIcon(
 ) {
     Icon(
         imageVector = Icons.Filled.Info,
-        contentDescription = "Show Details",
+        contentDescription = stringResource(id = R.string.show_details),
         modifier = Modifier
             .size(48.dp)
             .clickable {

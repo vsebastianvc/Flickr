@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">flickr</string>
+    <string name="search_flickr">Search Flickr</string>
+    <string name="no_internet_connection">No internet connection! &#xA;Please check your network settings.</string>
+    <string name="search_icon">Search Icon</string>
+    <string name="image_placeholder">image placeholder</string>
+    <string name="loading_details">Loading details...</string>
+    <string name="no_description_available">No description available</string>
+    <string name="date_not_available">Date not available</string>
+    <string name="back_to_gallery">Back to Gallery</string>
+    <string name="show_details">Show Details</string>
 </resources>
